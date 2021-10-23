@@ -55,7 +55,7 @@ constexpr bool inside_triangle(vec4 a, vec4 b, vec4 c, float x, float y) {
 	constexpr auto edge = [](vec4 a, vec4 b, float x, float y) -> bool {
 		return (x - a.x) * (b.y - a.y) - (y - a.y) * (b.x - a.x) >= 0;
 	};
-	return edge(b, a, x, y) & edge(c, b, x, y) & edge(a, c, x, y);
+	return edge(b, a, x, y) && edge(c, b, x, y) && edge(a, c, x, y);
 }
 
 constexpr float get_z_component(vec4 a, vec4 b, vec4 c, float x, float y) {

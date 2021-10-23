@@ -3,7 +3,7 @@ DUMPDIR := dump
 OUTDIR := out
 
 CC := g++
-CXXFLAGS := -std=c++20 -O3 -DNDEBUG -lfmt
+CXXFLAGS := -std=c++20 -O3 -DNDEBUG -lfmt -Wall -Wextra -Wpedantic
 
 all: pipeline
 
