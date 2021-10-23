@@ -70,16 +70,24 @@ constexpr float to_cartesian(int coord, int factor) {
 	return (coord * 2.0) / (factor - 1) - 1;
 }
 
-template <int W, int H>
+template <int W, int H, typename char_type>
 struct screen {
-	using char_type = char;
+	using shader_fn_type = std::function<char_type(float)>;
+
+	struct fragment {
+		shader_fn_type fn;
+
+		auto operator()(float n) {
+			return fn(n);
+		}
+	} shader;
 
 	std::array<char_type, W * H> buf;
 	std::array<float, W * H> depth;
 	const int w = W;
 	const int h = H;
 
-	constexpr screen() {
+	constexpr screen(shader_fn_type &&fn) : shader{fn} {
 		buf.fill('.');
 		depth.fill(0);
 	}
@@ -147,7 +155,7 @@ struct screen {
 				if (inside_triangle(p1, p2, p3, to_cartesian(j, w), to_cartesian(i, h))) {
 					auto d = get_z_component(p1, p2, p3, to_cartesian(j, w), to_cartesian(i, h));
 					if (auto c = at(j, i, d)) {
-						*c = '0' + (d + 1.0f) * 5.0f;
+						*c = shader(d);
 					}
 				}
 			}
@@ -192,12 +200,16 @@ template<> struct fmt::formatter<mat4> {
 };
 
 int main() {
-	screen<150, 50> screen;
+	const auto shader = [](float n) -> char {
+		return '0' + (n + 1.0f) * 5.0f;
+	};
 
-	auto v1 = vec3{ 1.0, -1.0,  1.5};
-	auto v2 = vec3{ 1.0,  1.0,  1.1};
-	auto v3 = vec3{-1.0,  1.0,  1.5};
-	auto v4 = vec3{-1.0, -1.0,  1.9};
+	screen<150, 50, char> screen(shader);
+
+	const auto v1 = vec3{ 1.0, -1.0,  1.5};
+	const auto v2 = vec3{ 1.0,  1.0,  1.1};
+	const auto v3 = vec3{-1.0,  1.0,  1.5};
+	const auto v4 = vec3{-1.0, -1.0,  1.9};
 
 	screen.draw(v1, v2, v3);
 	screen.draw(v1, v3, v4);
