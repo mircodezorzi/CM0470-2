@@ -97,24 +97,13 @@ struct screen {
 		return buf[y * w + x];
 	}
 
-	/* This would probably allocate memory onto the heap, so it's better to use good old raw pointers.
 	constexpr std::optional<std::reference_wrapper<char_type>> at(int x, int y, float d) {
 		assert(y * w + x < w * h);
-		if (depth[y * w + x] > d) {
+		if (depth[y * w + x] + 1 < d) {
 			return std::nullopt;
 		}
 		depth[y * w + x] = d;
 		return std::optional{std::reference_wrapper<char_type>{buf[y * w + x]}};
-	}
-	*/
-
-	constexpr char_type* at(int x, int y, float d) {
-		assert(y * w + x < w * h);
-		if (depth[y * w + x] + 1 < d) {
-			return nullptr;
-		}
-		depth[y * w + x] = d;
-		return &buf[y * w + x];
 	}
 
 	constexpr void render() {
@@ -155,7 +144,7 @@ struct screen {
 				if (inside_triangle(p1, p2, p3, to_cartesian(j, w), to_cartesian(i, h))) {
 					auto d = get_z_component(p1, p2, p3, to_cartesian(j, w), to_cartesian(i, h));
 					if (auto c = at(j, i, d)) {
-						*c = shader(d);
+						c->get() = shader(d);
 					}
 				}
 			}
