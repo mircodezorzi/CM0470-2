@@ -66,31 +66,31 @@ constexpr float get_z_component(vec4 a, vec4 b, vec4 c, float x, float y) {
 	return (-x_p * x - y_p * y - w_p) / z_p;
 }
 
-constexpr float to_cartesian(std::size_t coord, std::size_t factor) {
+constexpr float to_cartesian(int coord, int factor) {
 	return (coord * 2.0) / (factor - 1) - 1;
 }
 
-template <std::size_t W, std::size_t H>
+template <int W, int H>
 struct screen {
 	using char_type = char;
 
 	std::array<char_type, W * H> buf;
 	std::array<float, W * H> depth;
-	std::size_t w = W;
-	std::size_t h = H;
+	const int w = W;
+	const int h = H;
 
 	constexpr screen() {
 		buf.fill('.');
 		depth.fill(0);
 	}
 
-	constexpr char_type& at(std::size_t x, std::size_t y) {
+	constexpr char_type& at(int x, int y) {
 		assert(y * w + x < w * h);
 		return buf[y * w + x];
 	}
 
 	/* This would probably allocate memory onto the heap, so it's better to use good old raw pointers.
-	constexpr std::optional<std::reference_wrapper<char_type>> at(std::size_t x, std::size_t y, float d) {
+	constexpr std::optional<std::reference_wrapper<char_type>> at(int x, int y, float d) {
 		assert(y * w + x < w * h);
 		if (depth[y * w + x] > d) {
 			return std::nullopt;
@@ -100,7 +100,7 @@ struct screen {
 	}
 	*/
 
-	constexpr char_type* at(std::size_t x, std::size_t y, float d) {
+	constexpr char_type* at(int x, int y, float d) {
 		assert(y * w + x < w * h);
 		if (depth[y * w + x] + 1 < d) {
 			return nullptr;
@@ -111,21 +111,21 @@ struct screen {
 
 	constexpr void render() {
 		std::putc('+', stdout);
-		for (std::size_t i = 0; i < w; i++) {
+		for (int i = 0; i < w; i++) {
 			std::putc('-', stdout);
 		}
 		std::putc('+', stdout);
 		std::putc('\n', stdout);
-		for (std::size_t i = 0; i < h; i++) {
+		for (int i = 0; i < h; i++) {
 			std::putc('|', stdout);
-			for (std::size_t j = 0; j < w; j++) {
+			for (int j = 0; j < w; j++) {
 				std::putc(at(j, i), stdout);
 			}
 			std::putc('|', stdout);
 			std::putc('\n', stdout);
 		}
 		std::putc('+', stdout);
-		for (std::size_t i = 0; i < w; i++) {
+		for (int i = 0; i < w; i++) {
 			std::putc('-', stdout);
 		}
 		std::putc('+', stdout);
@@ -142,8 +142,8 @@ struct screen {
 		p2.normalize();
 		p3.normalize();
 
-		for (std::size_t i = 0; i < h; i++) {
-			for (std::size_t j = 0; j < w; j++) {
+		for (int i = 0; i < h; i++) {
+			for (int j = 0; j < w; j++) {
 				if (inside_triangle(p1, p2, p3, to_cartesian(j, w), to_cartesian(i, h))) {
 					auto d = get_z_component(p1, p2, p3, to_cartesian(j, w), to_cartesian(i, h));
 					if (auto c = at(j, i, d)) {
