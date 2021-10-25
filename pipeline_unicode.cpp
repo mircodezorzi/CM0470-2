@@ -6,8 +6,6 @@
 #include <locale>
 #include <optional>
 
-#include <fmt/format.h>
-
 struct vec3 {
 	float x;
 	float y;
@@ -163,42 +161,6 @@ struct screen {
 				}
 			}
 		}
-	}
-};
-
-template<> struct fmt::formatter<vec3> {
-	template <typename ParseContext>
-		constexpr auto parse(ParseContext& ctx) { return ctx.begin(); }
-
-	template <typename FormatContext>
-	auto format(const vec3& v, FormatContext& ctx) {
-		return format_to(ctx.out(), L"x: {} y: {} z: {}", v.x, v.y, v.z);
-	}
-};
-
-template<> struct fmt::formatter<vec4> {
-	template <typename ParseContext>
-		constexpr auto parse(ParseContext& ctx) { return ctx.begin(); }
-
-	template <typename FormatContext>
-	auto format(const vec4& v, FormatContext& ctx) {
-		return format_to(ctx.out(), L"x: {} y: {} z: {} w: {}", v.x, v.y, v.z, v.w);
-	}
-};
-
-template<> struct fmt::formatter<mat4> {
-	template <typename ParseContext>
-		constexpr auto parse(ParseContext& ctx) { return ctx.begin(); }
-
-	template <typename FormatContext>
-	auto format(const mat4& m, FormatContext& ctx) {
-		return format_to(ctx.out(),
-			L"{} {} {} {}\n{} {} {} {}\n{} {} {} {}\n{} {} {} {}\n",
-			m[0 * 4 + 0], m[0 * 4 + 1], m[0 * 4 + 2], m[0 * 4 + 3],
-			m[1 * 4 + 0], m[1 * 4 + 1], m[1 * 4 + 2], m[1 * 4 + 3],
-			m[2 * 4 + 0], m[2 * 4 + 1], m[2 * 4 + 2], m[2 * 4 + 3],
-			m[3 * 4 + 0], m[3 * 4 + 1], m[3 * 4 + 2], m[3 * 4 + 3]
-		);
 	}
 };
 
