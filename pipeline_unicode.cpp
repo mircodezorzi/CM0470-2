@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cstdio>
@@ -70,6 +71,15 @@ constexpr float to_cartesian(int coord, int factor) {
 	return (coord * 2.0) / (factor - 1) - 1;
 }
 
+constexpr vec4 bounding_box(vec4 a, vec4 b, vec4 c, int w, int h) {
+	return vec4{
+		(std::min({a.x, b.x, c.x, 0.0f}) + 1) * (w - 1) / 2.0f,
+		(std::max({a.x, b.x, c.x, 1.0f}) + 1) * (w - 1) / 2.0f,
+		(std::min({a.y, b.y, c.y, 0.0f}) + 1) * (h - 1) / 2.0f,
+		(std::max({a.y, b.y, c.y, 1.0f}) + 1) * (h - 1) / 2.0f
+	};
+}
+
 struct color {
 	short r;
 	short g;
@@ -86,7 +96,7 @@ template <int W, int H>
 struct screen {
 	using shader_fn_type = std::function<pixel(float)>;
 
-	struct fragment {
+	struct {
 		shader_fn_type fn;
 
 		auto operator()(float n) {
@@ -151,10 +161,14 @@ struct screen {
 		p2.normalize();
 		p3.normalize();
 
-		for (int i = 0; i < h; i++) {
-			for (int j = 0; j < w; j++) {
-				if (inside_triangle(p1, p2, p3, to_cartesian(j, w), to_cartesian(i, h))) {
-					auto d = get_z_component(p1, p2, p3, to_cartesian(j, w), to_cartesian(i, h));
+		auto bb = bounding_box(p1, p2, p3, w, h);
+
+		for (int i = bb.z; i < bb.w; i++) {
+			for (int j = bb.x; j < bb.y; j++) {
+				const auto mi = to_cartesian(i, h);
+				const auto mj = to_cartesian(j, w);
+				if (inside_triangle(p1, p2, p3, mj, mi)) {
+					auto d = get_z_component(p1, p2, p3, mj, mi);
 					if (auto c = at(j, i, d)) {
 						c->get() = shader(d);
 					}
